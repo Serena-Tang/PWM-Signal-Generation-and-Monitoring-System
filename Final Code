@@ -1,420 +1,443 @@
-1.		// This file is part of the GNU ARM Eclipse distribution.
-2.		// Copyright (c) 2014 Liviu Ionescu.
-3.		//
-4.		// School: University of Victoria, Canada.
-5.		// Course: ECE 355 "Microprocessor-Based Systems".
-6.		// This is for Project Demo.
-7.		//
-8.		// See "system/include/cmsis/stm32f0xx.h" for register/bit definitions.
-9.		// See "system/src/cmsis/vectors_stm32f0xx.c" for handler declarations.
-10.		// ----------------------------------------------------------------------------
-11.		
+//
+	// This file is part of the GNU ARM Eclipse distribution.
+	// Copyright (c) 2014 Liviu Ionescu.
+	//
+	
 
-12.		#include <stdio.h>
-13.		#include "diag/Trace.h"
-14.		#include "cmsis/cmsis_device.h"
-15.		
+	// ----------------------------------------------------------------------------
+	// School: University of Victoria, Canada.
+	// Course: ECE 355 "Microprocessor-Based Systems".
+	// This is template code for Part 2 of Introductory Lab.
+	//
+	// See "system/include/cmsis/stm32f0xx.h" for register/bit definitions.
+	// See "system/src/cmsis/vectors_stm32f0xx.c" for handler declarations.
+	// ----------------------------------------------------------------------------
+	
 
-16.		// ----------------------------------------------------------------------------
-17.		//
-18.		// STM32F0 empty sample (trace via $(trace)).
-19.		//
-20.		// Trace support is enabled by adding the TRACE macro definition.
-21.		// By default the trace messages are forwarded to the $(trace) output,
-22.		// but can be rerouted to any device or completely suppressed, by
-23.		// changing the definitions required in system/src/diag/trace_impl.c
-24.		// (currently OS_USE_TRACE_ITM, OS_USE_TRACE_SEMIHOSTING_DEBUG/_STDOUT).
-25.		//
-26.		
+	#include <stdio.h>
+	#include "diag/Trace.h"
+	#include "cmsis/cmsis_device.h"
+	
 
-27.		// ----- main() ---------------------------------------------------------------
-28.		
+	// ----------------------------------------------------------------------------
+	//
+	// STM32F0 empty sample (trace via $(trace)).
+	//
+	// Trace support is enabled by adding the TRACE macro definition.
+	// By default the trace messages are forwarded to the $(trace) output,
+	// but can be rerouted to any device or completely suppressed, by
+	// changing the definitions required in system/src/diag/trace_impl.c
+	// (currently OS_USE_TRACE_ITM, OS_USE_TRACE_SEMIHOSTING_DEBUG/_STDOUT).
+	//
+	
 
-29.		// Sample pragmas to cope with warnings. Please note the related line at
-30.		// the end of this function, used to pop the compiler diagnostics status.
-31.		#pragma GCC diagnostic push
-32.		#pragma GCC diagnostic ignored "-Wunused-parameter"
-33.		#pragma GCC diagnostic ignored "-Wmissing-declarations"
-34.		#pragma GCC diagnostic ignored "-Wreturn-type"
-35.		
+	// ----- main() ---------------------------------------------------------------
+	
 
-36.		
+	// Sample pragmas to cope with warnings. Please note the related line at
+	// the end of this function, used to pop the compiler diagnostics status.
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunused-parameter"
+	#pragma GCC diagnostic ignored "-Wmissing-declarations"
+	#pragma GCC diagnostic ignored "-Wreturn-type"
+	
 
-37.		/* Clock prescaler for TIM2 timer: no prescaling */
-38.		#define myTIM2_PRESCALER ((uint16_t)0x0000)/* Clock prescaler for TIM2 timer: no prescaling */
-39.		/* Maximum possible setting for overflow */
-40.		#define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)/* Maximum possible setting for overflow */
-41.		
+	
 
-42.		void myGPIOA_Init(void);
-43.		void myGPIOB_Init(void);
-44.		void myGPIOC_Init(void);
-45.		void myTIM2_Init(void);
-46.		void myEXTI_Init(void);
-47.		void ADC_Init(void);
-48.		void DAC_Init(void);
-49.		void writeLCD(uint16_t);
-50.		void RES_Calc(char*);
-51.		void Freq_Calc(char*);
-52.		// Declare/initialize your global variables here...
-53.		// NOTE: You'll need at least one global variable
-54.		// (say, timerEdge = 0 or 1) to indicate
-55.		// whether TIM2 has started counting or not.
-// Global Variables---------------------------------------------------------------------------
-56.		int timerEdge = 0;
-57.		float frequency;
-58.		char ResList[4]; //allocated for 4 digits
-59.		char FreqList[4]; //allocated for 4 digits
-60.		
+	/* Clock prescaler for TIM2 timer: no prescaling */
+	#define myTIM2_PRESCALER ((uint16_t)0x0000)
+	/* Maximum possible setting for overflow */
+	#define myTIM2_PERIOD ((uint32_t)0xFFFFFFFF)
+	
 
-61.		int
-62.		main(int argc, char* argv[])
-63.		{
-64.		
+	void myGPIOA_Init(void);
+	void myGPIOB_Init(void);
+	void myGPIOC_Init(void);
+	void myTIM2_Init(void);
+	void myEXTI_Init(void);
+	void ADC_Init(void);
+	void DAC_Init(void);
+	void writeLCD(uint16_t);
+	void printResistance(char*);
+	void printFrequency(char*);
+	// Declare/initialize your global variables here...
+	// NOTE: You'll need at least one global variable
+	// (say, timerTriggered = 0 or 1) to indicate
+	// whether TIM2 has started counting or not.
+	int timerTriggered = 0;
+	float frequency;
+	char resistanceArray[4]; //allocated for 4 digits
+	char frequencyArray[4]; //allocated for 4 digits
+	
 
-65.			trace_printf("This is the final demo of ece 355 project..\n");
-66.			trace_printf("System clock: %u Hz\n", SystemCoreClock);
-67.		
+	int
+	main(int argc, char* argv[])
+	{
+	
 
-68.			myGPIOA_Init();		//Initialize I/O port PA
-69.			myGPIOB_Init();		//Initialize I/O port PB
-70.			myGPIOC_Init();		//Initialize I/O port PC
-71.			myTIM2_Init();		//Initialize timer TIM2
-72.			myEXTI_Init();		//Initialize EXTI
-73.			ADC_Init();		//Initialize ADC
-74.			DAC_Init();		//Initialize DAC
-75.		
+		trace_printf("This is Part 2 of Introductory Lab...\n");
+		trace_printf("System clock: %u Hz\n", SystemCoreClock);
+	
 
-76.		
+		myGPIOA_Init();		//Initialize I/O port PA
+		myGPIOB_Init();		//Initialize I/O port PB
+		myGPIOC_Init();		//Initialize I/O port PC
+		myTIM2_Init();		//Initialize timer TIM2
+		myEXTI_Init();		//Initialize EXTI
+		ADC_Init();		//Initialize ADC
+		DAC_Init();		//Initialize DAC
+	
 
-77.			writeLCD(0x3800);
-78.			//Display is on, no cursor, no blinking
-79.			writeLCD(0x0C00);
-80.			//DDRAM address incremented after each access, no shifting
-81.			writeLCD(0x0600);
-82.			//Clear display
-83.			writeLCD(0x0100);
-84.		
+		//Initialize LCD
+		//DDRAM access is performed using 8-bit interface
+		//2 lines of 8 bit characters are displayed
+	
 
-85.			while (1)
-86.			{
-87.				while(!(ADC1->ISR & ADC_ISR_EOC)){}; //wait until conversion is finished
-88.		
+		writeLCD(0x3800);
+		//Display is on, no cursor, no blinking
+		writeLCD(0x0C00);
+		//DDRAM address incremented after each access, no shifting
+		writeLCD(0x0600);
+		//Clear display
+		writeLCD(0x0100);
+	
 
-89.				ADC1->ISR &= ~(ADC_ISR_EOC); //clear EOC flag
-90.		
+		while (1)
+		{
+			while(!(ADC1->ISR & ADC_ISR_EOC)){}; //wait until conversion is finished
+	
 
-91.				uint32_t ADCVAL = ADC1->DR & 0xFFF; //masked ADC reg value to get right hand alignment
-92.				float Resistance = ((float)(ADCVAL)-50)*1.2658; //calculate resistance from potentiometer voltage
-93.				sprintf(ResList, "%d", (int)Resistance);
-94.				RES_Calc(ResList);
-95.				sprintf(FreqList, "%d", (int)frequency);
-96.				Freq_Calc(FreqList);
-97.				//trace_printf("ADC Value: %d\n", (uint32_t)Resistance);
-98.		
+			ADC1->ISR &= ~(ADC_ISR_EOC); //clear EOC flag
+	
 
-99.				DAC->DHR12R1 = ADCVAL; //pass ADC input directly to DAC
-100.		
+			uint32_t ADCVAL = ADC1->DR & 0xFFF; //masked ADC reg value to get right hand alignment
+			float Resistance = ((float)(ADCVAL)-50)*1.2658; //calculate resistance from potentiometer voltage
+			sprintf(resistanceArray, "%d", (int)Resistance);
+			printResistance(resistanceArray);
+			sprintf(frequencyArray, "%d", (int)frequency);
+			printFrequency(frequencyArray);
+			//trace_printf("ADC Value: %d\n", (uint32_t)Resistance);
+	
 
-101.			}
-102.		
+			DAC->DHR12R1 = ADCVAL; //pass ADC input directly to DAC
+	
 
-103.			return 0;
-104.		
-105.		}
-106.		
+			//Final
+			//Read ADC Data register
+			//Perform conversion calculation
+			//Call LCD helper with read value
+			//Write to DAC
+		}
+	
 
-107.		
-108.		void myGPIOA_Init()
-109.		{
-110.			
-//PA0 -> ADC input (Mode: Analog)
-	   //PA1 -> PWM Signal input (Mode: Input)
-	   //PA4 -> DAC output (Mode: Analog)
+		return 0;
+	
 
-	// Enable clock for GPIOA
-111.			// Relevant register: RCC->AHBENR
-112.			RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
-113.		
+	}
+	
 
-114.			// Configure PA1 as input
-115.			// Relevant register: GPIOA->MODER
-116.			GPIOA->MODER &= ~(GPIO_MODER_MODER1);
-117.		
+	
 
-118.			// Ensure no pull-up/pull-down for PA1
-119.			// Relevant register: GPIOA->PUPDR
+	void myGPIOA_Init()
+	{
+		// Enable clock for GPIOA peripheral
+		// Relevant register: RCC->AHBENR
+		RCC->AHBENR |= RCC_AHBENR_GPIOAEN;
+	
 
-120.			GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
-121.		
-122.		
-123.			GPIOA->MODER |= GPIO_MODER_MODER4;
-124.		
+		// Configure PA1 as input
+		// Relevant register: GPIOA->MODER
+		GPIOA->MODER &= ~(GPIO_MODER_MODER1);
+	
 
-125.			// Ensure no pull-up/pull-down for PA4
-126.			GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR4);
-127.		}
-128.		
+		// Ensure no pull-up/pull-down for PA1
+		// Relevant register: GPIOA->PUPDR
+		GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
+	
 
-129.		void myGPIOB_Init()
-130.		{
-131.			// Enable clock for GPIOB peripheral
-132.			RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
-133.		
+		//Configure PA4 as analog output
+		GPIOA->MODER |= GPIO_MODER_MODER4;
+	
 
-134.			//Configure PB[15:8, 6:4] as Output, PB7 as input
-135.			GPIOB->MODER |= 0x55551500;
-136.			GPIOB->MODER &= ~(0xAAAAEA00);
-137.		
-138.			//Ensure no pull-up/pull-down for PB[15:4]
-139.			GPIOB->PUPDR &= ~(0xFFFFF00);
-140.		}
-141.		
+		// Ensure no pull-up/pull-down for PA4
+		GPIOA->PUPDR &= ~(GPIO_PUPDR_PUPDR4);
+	}
+	
 
-142.		void myGPIOC_Init(){
-143.			// Enable clock for GPIOC peripheral
-144.			RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
-145.		
+	void myGPIOB_Init()
+	{
+		// Enable clock for GPIOB peripheral
+		RCC->AHBENR |= RCC_AHBENR_GPIOBEN;
+	
 
-146.			//Configure PC1 as analog
-147.			GPIOC->MODER |= GPIO_MODER_MODER1;
-148.		
+		//Configure PB[15:8, 6:4] as Output, PB7 as input
+		GPIOB->MODER |= 0x55551500;
+		GPIOB->MODER &= ~(0xAAAAEA00);
+	
 
-149.			//Ensure no pull-up/pull-down for PC1
-150.			GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
-151.		}
-152.		
+		//Ensure no pull-up/pull-down for PB[15:4]
+		GPIOB->PUPDR &= ~(0xFFFFF00);
+	}
+	
 
-153.		
+	void myGPIOC_Init(){
+		// Enable clock for GPIOC peripheral
+		RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
+	
 
-154.		void myTIM2_Init()
-155.		{
-156.			/* Enable clock for TIM2 peripheral */
-157.			// Relevant register: RCC->APB1ENR
-158.			RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-159.		
+		//Configure PC1 as analog
+		GPIOC->MODER |= GPIO_MODER_MODER1;
+	
 
-160.			/* Configure TIM2: buffer auto-reload bit 7 = 1, count up bit 4 = 0, stop on overflow bit 3 = 1,
-161.			 * enable update events, interrupt on overflow only bit 2 = 1 */
-162.			// Relevant register: TIM2->CR1
-163.			//enable update events implicitly enabled in bit 2, but just on overflow/underflow
-164.			TIM2->CR1 = ((uint16_t)0x008C);
-165.		
+		//Ensure no pull-up/pull-down for PC1
+		GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPDR1);
+	}
+	
 
-166.			/* Set clock prescaler value */
-167.			TIM2->PSC = myTIM2_PRESCALER;
-168.			/* Set auto-reloaded delay */
-169.			TIM2->ARR = myTIM2_PERIOD;
-170.		
+	
 
-171.			/* Update timer registers */
-172.			// Loads all our configured timer settings when this bit is written
-173.			// Relevant register: TIM2->EGR
-174.			TIM2->EGR = ((uint16_t)0x0001);
-175.		
+	void myTIM2_Init()
+	{
+		/* Enable clock for TIM2 peripheral */
+		// Relevant register: RCC->APB1ENR
+		RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+	
 
-176.			/* Assign TIM2 interrupt priority = 0 in NVIC */
-177.			// Relevant register: NVIC->IP[3], or use NVIC_SetPriority
-178.			NVIC_SetPriority(TIM2_IRQn, 0);
-179.		
+		/* Configure TIM2: buffer auto-reload bit 7 = 1, count up bit 4 = 0, stop on overflow bit 3 = 1,
+		 * enable update events, interrupt on overflow only bit 2 = 1 */
+		// Relevant register: TIM2->CR1
+		//enable update events implicitly enabled in bit 2, but just on overflow/underflow
+		TIM2->CR1 = ((uint16_t)0x008C);
+	
 
-180.			/* Enable TIM2 interrupts in NVIC */
-181.			// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
-182.			NVIC_EnableIRQ(TIM2_IRQn);
-183.		
+		/* Set clock prescaler value */
+		TIM2->PSC = myTIM2_PRESCALER;
+		/* Set auto-reloaded delay */
+		TIM2->ARR = myTIM2_PERIOD;
+	
 
-184.			/* Enable update interrupt generation */
-185.			// Relevant register: TIM2->DIER
-186.			// Do this after NVIC interrupts are configured
-187.			TIM2->DIER |= TIM_DIER_UIE;
-188.		}
+		/* Update timer registers */
+		// Loads all our configured timer settings when this bit is written
+		// Relevant register: TIM2->EGR
+		TIM2->EGR = ((uint16_t)0x0001);
+	
 
-189.		void myEXTI_Init()
-190.		{
-191.			/* Map EXTI1 line to PA1 */
-192.			// Relevant register: SYSCFG->EXTICR[0]
-193.			// force bits 4-6 to zero, rest is unchanged
-194.			SYSCFG->EXTICR[0] &= SYSCFG_EXTICR1_EXTI1_PA;
-195.		
+		/* Assign TIM2 interrupt priority = 0 in NVIC */
+		// Relevant register: NVIC->IP[3], or use NVIC_SetPriority
+		NVIC_SetPriority(TIM2_IRQn, 0);
+	
 
-196.			/* EXTI2 line interrupts: set rising-edge trigger */
-197.			// Relevant register: EXTI->RTSR
-198.			EXTI->RTSR |= EXTI_RTSR_TR1;
-199.		
+		/* Enable TIM2 interrupts in NVIC */
+		// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
+		NVIC_EnableIRQ(TIM2_IRQn);
+	
 
-200.			/* Unmask interrupts from EXTI2 line */
-201.			// Relevant register: EXTI->IMR
-202.			EXTI->IMR |= EXTI_IMR_MR1;
-203.		
+		/* Enable update interrupt generation */
+		// Relevant register: TIM2->DIER
+		// Do this after NVIC interrupts are configured
+		TIM2->DIER |= TIM_DIER_UIE;
+	}
+	
 
-204.			/* Assign EXTI1 interrupt priority = 0 in NVIC */
-205.			// Relevant register: NVIC->IP[2], or use NVIC_SetPriority
-206.			NVIC_SetPriority(EXTI2_3_IRQn, 0);
-207.		
+	
 
-208.			/* Enable EXTI2 interrupts in NVIC */
-209.			// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
-210.			NVIC_EnableIRQ(EXTI2_3_IRQn);
-211.		}
-212.		
+	void myEXTI_Init()
+	{
+		/* Map EXTI1 line to PA1 */
+		// Relevant register: SYSCFG->EXTICR[0]
+		// force bits 4-6 to zero, rest is unchanged
+		SYSCFG->EXTICR[0] &= SYSCFG_EXTICR1_EXTI1_PA;
+	
 
-213.		
+		/* EXTI2 line interrupts: set rising-edge trigger */
+		// Relevant register: EXTI->RTSR
+		EXTI->RTSR |= EXTI_RTSR_TR1;
+	
 
-214.		/* This handler is declared in system/src/cmsis/vectors_stm32f0xx.c */
-215.		void TIM2_IRQHandler()
-216.		{
-217.			/* Check if update interrupt flag is indeed set */
-218.			if ((TIM2->SR & TIM_SR_UIF) != 0)
-219.			{
-220.				trace_printf("\n*** Overflow! ***\n");
-221.		
+		/* Unmask interrupts from EXTI2 line */
+		// Relevant register: EXTI->IMR
+		EXTI->IMR |= EXTI_IMR_MR1;
+	
 
-222.				/* Clear update interrupt flag */
-223.				// Relevant register: TIM2->SR
-224.				TIM2->SR &= ~(TIM_SR_UIF);
-225.		
+		/* Assign EXTI1 interrupt priority = 0 in NVIC */
+		// Relevant register: NVIC->IP[2], or use NVIC_SetPriority
+		NVIC_SetPriority(EXTI0_1_IRQn, 0);
+	
 
-226.				/* Restart stopped timer */
-227.				// Relevant register: TIM2->CR1
-228.				TIM2->CR1 |= TIM_CR1_CEN;
-229.			}
-230.		}
-231.		
+		/* Enable EXTI2 interrupts in NVIC */
+		// Relevant register: NVIC->ISER[0], or use NVIC_EnableIRQ
+		NVIC_EnableIRQ(EXTI0_1_IRQn);
+	}
+	
 
-232.		
+	
 
-233.		/* This handler is declared in system/src/cmsis/vectors_stm32f0xx.c */
-234.		void EXTI0_1_IRQHandler()
-235.		{
-236.			// Declare/initialize your local variables here...
-237.			float period;
-238.			int currentTimer;
-239.		
+	/* This handler is declared in system/src/cmsis/vectors_stm32f0xx.c */
+	void TIM2_IRQHandler()
+	{
+		/* Check if update interrupt flag is indeed set */
+		if ((TIM2->SR & TIM_SR_UIF) != 0)
+		{
+			trace_printf("\n*** Overflow! ***\n");
+	
 
-240.			/* Check if EXTI2 interrupt pending flag is indeed set */
-241.			if ((EXTI->PR & EXTI_PR_PR1) != 0)
-242.			{
-243.				//
-244.				// 1. If this is the first edge: ie. timer has not been triggered
-245.				if(!timerEdge)
-246.				{
-247.					//	- Clear count register (TIM2->CNT).
-248.					TIM2->CNT &= (uint32_t)0x00000000;
-249.					//	- Start timer (TIM2->CR1).
-250.					TIM2->CR1 |= TIM_CR1_CEN;
-251.					timerEdge = 1;
-252.				}
-253.				//    Else (this is the second edge):
-254.				else
-255.				{
-256.					//	- Stop timer (TIM2->CR1).
-257.					TIM2->CR1 &= ~(TIM_CR1_CEN);
-258.					//	- Read out count register (TIM2->CNT).
-259.					//	- Calculate signal period and frequency.
-260.					currentTimer = TIM2->CNT;
-261.					period = currentTimer/(float)48000000;
-262.					frequency = 1/period;
-263.					//	- Print calculated values to the console.
-264.					timerEdge = 0;
-265.					//	  NOTE: Function trace_printf does not work
-266.					//	  with floating-point numbers: you must use
-267.					//	  "unsigned int" type to print your signal 
-268.				}
-269.				//
-270.				// 2. Clear EXTI2 interrupt pending flag (EXTI->PR).
-271.				// NOTE: A pending register (PR) bit is cleared
-272.				// by writing 1 to it.
-273.				EXTI->PR |= EXTI_PR_PR2;
-274.			}
-275.		}
-276.		
+			/* Clear update interrupt flag */
+			// Relevant register: TIM2->SR
+			TIM2->SR &= ~(TIM_SR_UIF);
+	
 
-277.		void ADC_Init()
-278.		{
-279.			// Enable clock for ADC
-280.			RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
-281.		
+			/* Restart stopped timer */
+			// Relevant register: TIM2->CR1
+			TIM2->CR1 |= TIM_CR1_CEN;
+		}
+	}
+	
 
-282.			// Disable ADC
-283.			ADC1->CR &= ~(ADC_CR_ADEN);
-284.		
+	
 
-285.			//Find calibration of ADC
-286.			ADC1-> CR |= ADC_CR_ADCAL;
-287.		
-288.		
-289.			//Wait until ADC is ready
-290.			while((ADC1->CR & ADC_CR_ADCAL)==ADC_CR_ADCAL){};
+	/* This handler is declared in system/src/cmsis/vectors_stm32f0xx.c */
+	void EXTI0_1_IRQHandler()
+	{
+		// Declare/initialize your local variables here...
+		float period;
+		int currentTimer;
+	
 
+		/* Check if EXTI2 interrupt pending flag is indeed set */
+		if ((EXTI->PR & EXTI_PR_PR1) != 0)
+		{
+			//
+			// 1. If this is the first edge: ie. timer has not been triggered
+			if(!timerTriggered)
+			{
+				//	- Clear count register (TIM2->CNT).
+				TIM2->CNT &= (uint32_t)0x00000000;
+				//	- Start timer (TIM2->CR1).
+				TIM2->CR1 |= TIM_CR1_CEN;
+				timerTriggered = 1;
+			}
+			//    Else (this is the second edge):
+			else
+			{
+				//	- Stop timer (TIM2->CR1).
+				TIM2->CR1 &= ~(TIM_CR1_CEN);
+				//	- Read out count register (TIM2->CNT).
+				//	- Calculate signal period and frequency.
+				currentTimer = TIM2->CNT;
+				period = currentTimer/(float)48000000;
+				frequency = 1/period;
+				//	- Print calculated values to the console.
+				timerTriggered = 0;
+				//	  NOTE: Function trace_printf does not work
+				//	  with floating-point numbers: you must use
+				//	  "unsigned int" type to print your signal
+				//	  period and frequency.
+	
 
-	// Continuous conversion | Overrun mode
-	ADC1->CFGR1 |= (ADC_CFGR1_CONT | ADC_CFGR1_OVRMOD);
+				//printFrequency(frequencyArray);
+				//trace_printf("Frequency: %0.6f\n", frequency);
+			}
+			//
+			// 2. Clear EXTI2 interrupt pending flag (EXTI->PR).
+			// NOTE: A pending register (PR) bit is cleared
+			// by writing 1 to it.
+			EXTI->PR |= EXTI_PR_PR2;
+		}
+	}
+	
 
+	void ADC_Init()
+	{
+		// Enable clock for ADC
+		RCC->APB2ENR |= RCC_APB2ENR_ADCEN;
+	
 
-	//Channel 0 point to PC1
-	ADC1->CHSELR = ADC_CHSELR_CHSEL11;
-291.		
+		// Enable port 11 of the ADC, mapped to PC1
+		ADC1->CHSELR |= ADC_CHSELR_CHSEL11;
+	
 
-292.			//Start ADC, values can now be read from ADC_DR
-293.			ADC1->CR |= ADC_CR_ADEN;
-       while(!(ADC1->ISR & ADC_ISR_ADRDY){};
+		//Select maximum sampling time
+		ADC1->SMPR |= ADC_SMPR_SMP;
+	
 
-294.		}
-295.		
+		//Continuous conversion | Overrun mode
+		ADC1->CFGR1 |= (ADC_CFGR1_CONT | ADC_CFGR1_OVRMOD);
+	
 
-296.		void DAC_Init(){
-297.			//Enable clock for DAC
-298.			RCC->APB1ENR |= RCC_APB1ENR_DACEN;
-299.		
-300.			//Enable DAC
-301.			DAC->CR |= DAC_CR_EN1;
-302.		}
-303.		
+		//Maximum resolution | Right alignment
+		ADC1->CFGR1 &= ~(ADC_CFGR1_RES | ADC_CFGR1_ALIGN);
+	
 
-304.		void writeLCD(uint16_t inputValue){//send inputValue to LCD, assumed that any ascii conversion has been completed
-305.			//send the 4 sequential instructions to LCD
-306.			//clear port B[15:4]
-307.			GPIOB->ODR &= ~(0xFFF0);
-308.			//write first instruction to port B
-309.			GPIOB->ODR |= inputValue;
-310.			//assert enable
-311.			GPIOB->ODR |= 0x10;
-312.			//wait for LCD done flag to be asserted
-313.			while(!(GPIOB->IDR & 0x80)){};
-314.			//deassert enable
-315.			GPIOB->ODR &= ~(0x10);
-316.			//wait for LCD done flag to be deasserted
-317.			while(GPIOB->IDR & 0x80){};
-318.		}
-319.		
+		//Enable ADC
+		ADC1->CR |= ADC_CR_ADEN;
+	
 
-320.		void RES_Calc(char output[]){
-321.			//set second row and first column
-322.			writeLCD(0xC000);
-323.			//Write R
-324.			writeLCD(0x5220);
-325.			//write :
-326.			writeLCD(0x3A20);
-327.			for(int i = 0; i < sizeof(output); i++)
-328.			{
-329.				writeLCD((output[i]<<8) | 0x20);
-330.			}
-331.		}
-332.		void Freq_Calc(char output[]){
-333.			NVIC_DisableIRQ(EXTI0_1_IRQn);
-334.			//set first row and column
-335.			writeLCD(0x8000);
-336.			//Write F
-337.			writeLCD(0x4620);
-338.			//write :
-339.			writeLCD(0x3A20);
-340.			for(int i = 0; i < sizeof(output); i++)
-341.			{
-342.				writeLCD((output[i]<<8) | 0x20);
-343.			}
-344.			NVIC_EnableIRQ(EXTI0_1_IRQn);
-345.		}
-346.		#pragma GCC diagnostic pop
-347.		
-348.		// ----------------------------------------------------------------------------
+		//Wait until ADC is ready
+		while(!(ADC1->ISR & ADC_ISR_ADRDY)){};
+	
+
+		//Start ADC, values can now be read from ADC_DR
+		ADC1->CR |= ADC_CR_ADSTART;
+	}
+	
+
+	void DAC_Init(){
+		//Enable clock for DAC
+		RCC->APB1ENR |= RCC_APB1ENR_DACEN;
+	
+
+		//Enable DAC
+		DAC->CR |= DAC_CR_EN1;
+	}
+	
+
+	void writeLCD(uint16_t inputValue){//send inputValue to LCD, assumed that any ascii conversion has been completed
+		//send the 4 sequential instructions to LCD
+		//clear port B[15:4]
+		GPIOB->ODR &= ~(0xFFF0);
+		//write first instruction to port B
+		GPIOB->ODR |= inputValue;
+		//assert enable
+		GPIOB->ODR |= 0x10;
+		//wait for LCD done flag to be asserted
+		while(!(GPIOB->IDR & 0x80)){};
+		//deassert enable
+		GPIOB->ODR &= ~(0x10);
+		//wait for LCD done flag to be deasserted
+		while(GPIOB->IDR & 0x80){};
+	}
+	
+
+	void printResistance(char output[]){
+		//set second row and first column
+		writeLCD(0xC000);
+		//Write R
+		writeLCD(0x5220);
+		//write :
+		writeLCD(0x3A20);
+		for(int i = 0; i < sizeof(output); i++)
+		{
+			writeLCD((output[i]<<8) | 0x20);
+		}
+	}
+	
+
+	void printFrequency(char output[]){
+		NVIC_DisableIRQ(EXTI0_1_IRQn);
+		//set first row and column
+		writeLCD(0x8000);
+		//Write F
+		writeLCD(0x4620);
+		//write :
+		writeLCD(0x3A20);
+		for(int i = 0; i < sizeof(output); i++)
+		{
+			writeLCD((output[i]<<8) | 0x20);
+		}
+		NVIC_EnableIRQ(EXTI0_1_IRQn);
+	}
+	#pragma GCC diagnostic pop
+	
+
+	// ----------------------------------------------------------------------------
 
