@@ -1,5 +1,5 @@
 # PWM-Signal-Generation-and-Monitoring-System
-The objective of this project is to use the features given on Eclipse Software Development Kits and a STM32F0 (microprocessor) to design a system to measure the voltage across a potentiometer (POT) on the ECE 355 Emulation board and relay it to the external optocoupler for controlling the PWM signal frequency, as well as to measure the frequency of the generated PWM signal. 
+The objective of this C language project is to use the features given on Eclipse Software Development Kits and a STM32F0 (microprocessor) to design a system to measure the voltage across a potentiometer (POT) on the ECE 355 Emulation board and relay it to the external optocoupler for controlling the PWM signal frequency, as well as to measure the frequency of the generated PWM signal. 
 https://www.ece.uvic.ca/~ece355/lab/index.html
 
 Course work\
